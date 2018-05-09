@@ -1,5 +1,3 @@
-import { type } from 'os';
-
 // Location, Bio, Experience, Education, Social Links
 
 const express = require('express');
@@ -35,6 +33,7 @@ router.get('/', passport.authenticate('jwt', { session: false }), (req, res) => 
         })
         .catch(err => res.status(404).json(err));
 });
+
 // @route POST api/profile
 // @desc create user profile
 // @access private
@@ -42,8 +41,8 @@ router.get('/', passport.authenticate('jwt', { session: false }), (req, res) => 
 router.post(
     '/',
     passport.authenticate('jwt', { session: false }),
-    (req, res) => {
-        // Get fields
+    (req, res) => 
+    {   // Get fields
         const profileFields = {}; //<<< Info from the form
         profileFields.user = req.user.id //<<< .user does NOT come from the form
         if(req.body.handle) profileFields.handle = req.body.handle; //<<< Check if the field we are looking for has come in
@@ -65,9 +64,35 @@ router.post(
         if(req.body.linkedin) profileFields.social.linkedin = req.body.linkedin; //<<< Check if the field we are looking for has come in
         if(req.body.instagram) profileFields.social.instagram = req.body.instagram; //<<< Check if the field we are looking for has come in
 
-    
-    
-    }
-);
+        // ─── SEARCH FOR USER BY LOGGED IN ID ─────────────────────────────
 
+        Profile.findOne({ user: req.user.id })
+            .then(profile => {
+                if(profile) {
+                    // IF USER HAS PROFILE UPDATE HERE v
+                    Profile.findOneAndUpdate(
+                        { user: req.user.id }, 
+                        { $set: profileFields }, 
+                        { new: true }
+                    )
+                    .then(profile => res(profile));
+                    // IF USER HAS PROFILE UPDATE HERE ^
+                } 
+                else 
+                {   // Create 
+
+                    // IF HANDLE EXISTS THROW ERROR v
+                    Profile.findOne({ handle: profileFields.handle }).then(profile => {
+                        if(profile) {
+                            errors.handle = 'That handle already exists';
+                            res.status(404).json(errors);
+                        }
+                    // IF HANDLE EXISTS THROW ERROR ^ 
+                    //
+                    // IF HANDLE DOES NOT EXIST CREATE PROFILE
+                    new Profile(profileFields).save().then(profile => res.json(profile));
+                    });
+                }
+            });
+    }),
 module.exports = router;
