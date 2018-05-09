@@ -44,6 +44,7 @@ router.get(
 //@route            GET api/profile/all
 //what this does... Get all profiles
 //@access           Public
+
 router.get("/all", (req, res) => {
   const errors = {};
 
@@ -61,13 +62,14 @@ router.get("/all", (req, res) => {
     );
 });
 
-//@route            GET api/profile/handle/:handle
-//what this does... Get profile by handle
-//@access           Public
+// @route GET api/profile/handle/:handle (backend route)
+// @desc Get profile by handle
+// @access Public
 
-router.get("/handle/:handle", (req, res) => {
+router.get("/handle/:handle", (req, res) => { //<<< placeholder
   const errors = {};
-  Profile.findOne({ handle: req.params.handle })
+  //  Find by handle vvv    vvv get handle from url by...req.params.handle
+  Profile.findOne({ handle: req.params.handle }) //<<< use our Profile model
     .populate("user", ["name", "avatar"])
     .then(profile => {
       if (!profile) {
@@ -80,13 +82,13 @@ router.get("/handle/:handle", (req, res) => {
     .catch(err => res.status(404).json(err));
 });
 
-//@route            GET api/profile/user/:user_id
-//what this does... Get profile by user id
-//@access           Public
+// @route GET api/profile/user/:user_id
+// @desc Get profile by user id
+// @access Public
 
 router.get("/user/:user_id", (req, res) => {
   const errors = {};
-
+  // Find by user_id vvv        vvv get handle from url by...req.params.user_id
   Profile.findOne({ user: req.params.user_id })
     .populate("user", ["name", "avatar"])
     .then(profile => {
@@ -101,9 +103,9 @@ router.get("/user/:user_id", (req, res) => {
     );
 });
 
-//@route            POST api/profile
-//what this does... Create or edit user profile
-//@access           Private
+// @route POST api/profile
+// @desc Create or edit user profile
+// @access Private
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
