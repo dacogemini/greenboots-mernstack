@@ -14,14 +14,16 @@ const Profile = require("../../models/Profile");
 //load User profile
 const User = require("../../models/User");
 
-//@route            GET api/profile/test
-//what this does... Tests profile route
-//@access           Public
+// @route GET api/profile/test
+// @desc Tests profile route
+// @access Public
+
 router.get("/test", (req, res) => res.json({ msg: "Profile Works" }));
 
-//@route            GET api/profile
-//what this does... Get current user's profile
-//@access           Private
+// @route  GET api/profile
+// @desc Get current user's profile
+// @access Private
+
 router.get(
   "/",
   passport.authenticate("jwt", { session: false }),
@@ -130,7 +132,7 @@ router.post(
     if (req.body.githubusername)
       profileFields.githubusername = req.body.githubusername;
 
-    //Skilss - Split into Array using split() method
+    //Skills - Split into Array using split() method
     if (typeof req.body.skills !== "undefined") {
       profileFields.skills = req.body.skills.split(",");
     }
@@ -170,9 +172,12 @@ router.post(
     });
   }
 );
-//@route            Post api/profile/experience
-//what this does... Add experience to profile
-//@access           Private
+
+//
+// ────────────────────────────────────────────────────────── POST EXPERIENCE ─────
+// @route Post api/profile/experience
+// @desc Add experience to profile
+// @access Private
 
 router.post(
   "/experience",
@@ -185,9 +190,10 @@ router.post(
       //Return any errors with 400 status
       return res.status(400).json(errors);
     }
-
+    // Find by user >>>         // user comes from our token
     Profile.findOne({ user: req.user.id }).then(profile => {
       const newExp = {
+        // From form
         title: req.body.title,
         company: req.body.company,
         location: req.body.location,
@@ -196,17 +202,20 @@ router.post(
         current: req.body.current,
         description: req.body.description
       };
+
       //add to exprience array
-      profile.experience.unshift(newExp);
+      profile.experience.unshift(newExp); // <<< unshift puts to the beginning
 
       profile.save().then(profile => res.json(profile));
     });
   }
 );
 
-//@route            Post api/profile/education
-//what this does... Add education to profile
-//@access           Private
+//
+// ─────────────────────────────────────────────────────────── POST EDUCATION ─────
+// @route POST api/profile/education
+// @desc  Add education to profile
+// @access Private
 
 router.post(
   "/education",
@@ -238,9 +247,11 @@ router.post(
   }
 );
 
-//@route            DELETE api/profile/education/:edu_id
-//what this does... delete education from profile
-//@access           Private
+//
+// ───────────────────────────────────────────────────────── DELETE EDUCATION ─────
+// @route DELETE api/profile/education/:edu_id
+// @desc delete education from profile
+// @access Private
 
 router.delete(
   "/education/:edu_id",
@@ -249,6 +260,7 @@ router.delete(
     Profile.findOne({ user: req.user.id }).then(profile => {
       //Get remove index
       const removeIndex = profile.education
+        // Map array to item id <<< Only gets information
         .map(item => item.id)
         .indexOf(req.params.edu_id);
 
@@ -263,23 +275,50 @@ router.delete(
         .catch(err => res.status(404).json(err));
     });
 
-
-//@route            DELETE api/profile
-//what this does... delete user and profile
-//@access           Private
+//
+// ──────────────────────────────────────────────────────── DELETE EXPERIENCE ─────
+// @route   DELETE api/profile/experience/:exp_id
+// @desc    Delete experience from profile
+// @access  Private
 
 router.delete(
-  "/",
-  passport.authenticate("jwt", { session: false }),
+  '/experience/:exp_id',
+  passport.authenticate('jwt', { session: false }),
   (req, res) => {
-    Profile.findOneAndRemove({ user: req.user.id })
-    .then(() => {
-      User.findOneAndRemove({ _id: req.user.id })
-      .then( () => res.json({ success: true })
-    );
-  })
-  }
-)
+    Profile.findOne({ user: req.user.id })
+      .then(profile => {
+        // Get remove index
+        const removeIndex = profile.experience
+          .map(item => item.id)
+          .indexOf(req.params.exp_id);
 
+        // Splice out of array
+        profile.experience.splice(removeIndex, 1);
+
+        // Save
+        profile.save().then(profile => res.json(profile));
+      })
+      .catch(err => res.status(404).json(err));
+  }
+);
+
+//
+// ────────────────────────────────────────────────── DELETE USER AND PROFILE ─────
+// @route   DELETE api/profile
+// @desc    Delete user and profile
+// @access  Private
+
+router.delete(
+  '/',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    Profile.findOneAndRemove({ user: req.user.id }).then(() => {
+      User.findOneAndRemove({ _id: req.user.id }).then(() =>
+        res.json({ success: true })
+      );
+    });
+  }
+);
 
 module.exports = router;
+
