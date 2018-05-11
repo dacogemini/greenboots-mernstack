@@ -13,9 +13,22 @@ const validatePostInput = require('../../validation/post');
 
 router.get("/test", (req, res) => res.json({ msg: "Posts Works" }));
 
-//@route            POST api/posts
-//what this does... Create post
-//@access           Private
+// @route GET api/posts
+// @desc Get posts
+// @access  Public
+
+router.get('/', (req, res) => {
+  Post.find()
+    // Sort by data 
+    .sort({ date: -1 })
+    .then(posts => res.json(posts))
+    .catch(err => res.sendStatus(404));
+});
+
+// @route POST api/posts
+// @desc Create post
+// @access  Private
+
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }), // Protecting route with password
