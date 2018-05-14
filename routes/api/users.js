@@ -20,26 +20,28 @@ const User = require("../../models/User");
 //@access           Public
 // router.get("/test", (req, res) => res.json({ msg: "Users Works" }));
 
-//@route            GET api/users/register
+//@route            POST api/users/register
 //what this does... Registers a user
 //@access           Public
 router.post("/register", (req, res) => {
   const { errors, isValid } = validateRegisterInput(req.body);
-  //check validsation
+
+  // Check Validation
   if (!isValid) {
     return res.status(400).json(errors);
   }
-  // looking for a record of the email the user is trying register with
+
   User.findOne({ email: req.body.email }).then(user => {
     if (user) {
       errors.email = "Email already exists";
       return res.status(400).json(errors);
     } else {
       const avatar = gravatar.url(req.body.email, {
-        s: "200", //Size of avatar
-        r: "pg", //Rating
-        d: "mm" //Default
+        s: "200", // Size
+        r: "pg", // Rating
+        d: "mm" // Default
       });
+
       const newUser = new User({
         name: req.body.name,
         email: req.body.email,
@@ -49,22 +51,19 @@ router.post("/register", (req, res) => {
 
       bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(newUser.password, salt, (err, hash) => {
-          if (err) {
-            throw err;
-          } else {
-            newUser.password = hash;
-            newUser
-              .save()
-              .then(user => res.json(user))
-              .catch(err => console.log(err));
-          }
+          if (err) throw err;
+          newUser.password = hash;
+          newUser
+            .save()
+            .then(user => res.json(user))
+            .catch(err => console.log(err));
         });
       });
     }
   });
 });
 
-//@route            GET api/users/login
+//@route            POST api/users/login
 //what this does... returning Json Web Token so user can login 'every user needs a token'
 //@access           Public
 

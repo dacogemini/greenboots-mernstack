@@ -20,10 +20,20 @@
     "express": "^4.16.3",
     "gravatar": "^1.6.0",
     "jsonwebtoken": "^8.2.1",
+    "jwt-decode": "^2.2.0",
+    "moment": "^2.22.1",
     "mongoose": "^5.0.17",
     "nodemon": "^1.17.4",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
+    "react": "^16.3.2",
+    "react-dom": "^16.3.2",
+    "react-moment": "^0.7.0",
+    "react-redux": "^5.0.7",
+    "react-router-dom": "^4.2.2",
+    "redux": "^4.0.0",
+    "redux-thunk": "^2.2.0",
+    "types": "^0.1.1",
     "validator": "^10.1.0"
   }
 }
