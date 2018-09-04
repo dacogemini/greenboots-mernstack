@@ -1,3 +1,4 @@
+// user file only deals with authentication
 //what is this file for?
 //authentication, username, email, password, users model
 const express = require("express");
@@ -23,6 +24,11 @@ const User = require("../../models/User");
 //@route            POST api/users/register
 //what this does... Registers a user
 //@access           Public
+
+//* @route GET api/users/register
+//* @desc Register a user
+//* @access PUBLIC << Note: in order to access a private route, you'll need a JSON Web Token
+
 router.post("/register", (req, res) => {
   const { errors, isValid } = validateRegisterInput(req.body);
 
@@ -31,10 +37,14 @@ router.post("/register", (req, res) => {
     return res.status(400).json(errors);
   }
 
-  User.findOne({ email: req.body.email }).then(user => {
-    if (user) {
-      errors.email = "Email already exists";
-      return res.status(400).json(errors);
+  User.findOne({ email: req.body.email }) //! << uses body-parser
+     // A promise is a placeholder 
+     // into which the successful result 
+     // value or reason for failure will materialize.
+    .then(user => {
+      if (user) {
+        errors.email = "Email already exists";
+          return res.status(400).json(errors);
     } else {
       const avatar = gravatar.url(req.body.email, {
         s: "200", // Size
