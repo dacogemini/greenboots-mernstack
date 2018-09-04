@@ -15,7 +15,8 @@ app.use(bodyParser.json());
 //DB config
 const db = require("./config/keys").mongoURI;
 
-//connect to MongoDB
+// Connect to MongoDB | Mongoose creates a 'virtual object database'
+// Mongoose converts Relational DB (firtName, lastName, Phone) info into (1) object
 mongoose
   .connect(db)
   .then(() => console.log(`MongoDB connected`))
@@ -32,6 +33,8 @@ app.use("/api/users", users);
 app.use("/api/profile", profile);
 app.use("/api/posts", posts);
 
+// Deploy to Heroku PORT or locally to port 5000
 const port = process.env.PORT || 5000;
 
+// Run Server | Use ES6 Template Literal
 app.listen(port, () => console.log(`Server running on ${port}`));
